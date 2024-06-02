@@ -1,0 +1,79 @@
+clear all
+neg = -1;
+imnum = 0 + 1*1i;
+c = 3e08;
+thickness1 =1; substrate thickness
+thickness2 =47e-09; Metal thickness
+thickness3 =05e-09; analyte thickness
+thickness4 = 0e-09;
+thickness5 = 0e-09;
+dielectric1 =2.2895; substrate refractive indice
+dielectric2 = -6.2735+1i*0.20040;
+dielectric3 =1.00 + 0 * 1i ;%-10.753+1i*1.2596;
+dielectric4 =1.00 + 0 * 1i ;%1.335+i*0;
+dielectric5 =1.00 + 0 * 1i ;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+wavelength =435e-09;
+fixed_angle = 40.0000;
+start_wavelength = 400e-09;
+end_wavelength =800e-09;
+wavestep = 0.5e-09;
+anglestep = 0.001*pi/180;
+start_angle =10*pi/180;
+end_angle =90*pi/180;
+array_index = 0;
+% to input values
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Calculate physical parameters based on input
+k0 = (2*pi)/(wavelength);
+w = k0 * c;
+index1 = sqrt(dielectric1);
+index2 = sqrt(dielectric2);
+index3 = sqrt(dielectric3);
+index4 = sqrt(dielectric4);
+index5 = sqrt(dielectric5);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Start main program loop and body
+%('3  layers  simulation to model ');
+% START
+% Three layer system
+%theta =start_angle;
+for theta = start_angle:anglestep:end_angle;
+wave = start_wavelength:wavestep:end_wavelength;
+array_index = array_index +1;
+rect2 = (k0*sqrt((index2^2)-(index1^2)*(sin(theta)^2)));
+q3=(sqrt((index3^2)-(index1^2)*(sin(theta)^2)))/(index3^2);
+%if (imag(rect2) > 0)
+%rect2 = -rect2;
+%end
+%if (imag(q3) > 0)
+%q3 = -q3;
+% end
+q2 =(sqrt((index2^2)-(index1^2)*(sin(theta)^2)))/(index2^2);
+q1 = cos(theta)/(index1);
+betha = thickness2*rect2;
+M11= cos(betha);
+M12 = (-i*sin(betha)/q2);
+M21 =(-i*q2*sin(betha));
+M22 = cos(betha);
+% Solve for master matrix values
+matrix2 = [M11,M12 ; M21 ,M22 ];
+a = (M11+(M12*q3))*q1;
+b = M21+(M22*q3);
+Rum = a-b;
+Dem = a+b;
+r =(Rum/Dem);
+%x=real(r)^2
+%y=imag(r)^2
+R = sqrt(real(r)^2+imag(r)^2);
+R1 = R^2;
+xaxis(array_index) = theta*180/pi;
+reflective(array_index) =R1;
+end
+%figure (1)
+hold on
+plot(xaxis,reflective,'r','LineWidth',2);
+hold on
+xlabel('Angle (degree)','fontsize',30);
+ylabel('Reflevtivity','fontsize',30);
+axis([30 90 0 1]);
